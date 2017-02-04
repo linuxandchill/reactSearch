@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+ 
 const DEFAULT_QUERY = '';
 const DEFAULT_PAGE = 0;
 const DEFAULT_HPP = '10';
@@ -15,6 +16,7 @@ class App extends Component {
       results: null,
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
+      loading: false 
     };
     this.needsToSearchTopstories = this.needsToSearchTopstories.bind(this);
     this.setSearchTopstories = this.setSearchTopstories.bind(this);
@@ -42,14 +44,17 @@ class App extends Component {
         results: {
           ...results,
           [searchKey]: { hits: updatedHits, page }
-        }
+        },
+        isLoading: false 
       });
   }
   fetchSearchTopstories(searchTerm, page) {
+    this.setState({isLoading: true})
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
     .then(response => response.json())
     .then(result => this.setSearchTopstories(result));
   }
+
   needsToSearchTopstories(searchTerm) {
     return !this.state.results[searchTerm];
   }
@@ -80,7 +85,8 @@ class App extends Component {
     const {
       searchTerm,
       results,
-      searchKey
+      searchKey,
+      isLoading
     } = this.state;
     const page = (
       results &&
@@ -169,6 +175,10 @@ const Button = ({ onClick, className = '', children }) =>
 >
   {children}
 </button>
+
+const withLoading = (Component) => ({isLoading, ...rest}) => 
+  isLoading ? <Loading /> : <Component {...rest} /> 
+
 export default App;
 
 export {
